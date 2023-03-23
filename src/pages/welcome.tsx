@@ -12,3 +12,13 @@ const Welcome: NextPage = () => {
 };
 
 export default Welcome;
+
+
+/**
+ * sumoregn/fix-content: some changes made
+ *
+ *
+ *
+ *
+ *
+ */
