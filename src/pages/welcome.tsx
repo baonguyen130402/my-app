@@ -17,6 +17,11 @@ export default Welcome;
 /**
  * sumoregn/fix-content: some changes made
  *
+ * feat(landing): add new button
+ * fix(about): input not validating
+ * chore(build): add new build script
+ *
+ * atomic commit
  *
  *
  *
