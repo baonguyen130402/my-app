@@ -27,6 +27,10 @@ export default Welcome;
  * atomic commit
  *
  *
+ * Create new branch: git checkout -b $branch_name
+ * 
+ *
+ *
  *
  *
  */
