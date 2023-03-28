@@ -14,7 +14,7 @@ const Welcome: NextPage = () => {
 export default Welcome;
 
 
-// This is a change on branch `master`.
+// This is changes on branch `master`, which is then modified on branch `sumoregn/fix-welcome`.
 
 
 /**
