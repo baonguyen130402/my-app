@@ -2,7 +2,7 @@ import { type NextPage } from "next";
 import { useState } from "react";
 
 const Welcome: NextPage = () => {
-  const [auth, setAuth] = useState(false);
+  const [authState, setAuth] = useState(false);
 
   return (
     <>
@@ -18,7 +18,7 @@ export default Welcome;
 /**
  * sumoregn/fix-content: some changes made
  *
- * feat(landing): add new button
+ * feat(welcome): add new button
  * fix(about): input not validating
  * chore(build): add new build script
  *
