@@ -1,6 +1,5 @@
 import React from "react";
-import { useState } from "react";
-import { InfoCard } from "./InfoCard";
+import AuthService from "~/services/AuthService";
 
 export const LogInForm = ({ setAuth }: { setAuth: () => void }) => {
   return (
@@ -25,7 +24,9 @@ export const LogInForm = ({ setAuth }: { setAuth: () => void }) => {
         </div>
         <button
           className="text mt-3 w-full rounded-xl bg-blue-600 px-4 py-2 text-stone-300 hover:bg-blue-500"
-          onClick={AuthService.logIn()}
+          onClick={event => {
+            AuthService.logIn()
+          }}
         >
           Login
         </button>
