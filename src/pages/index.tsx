@@ -1,7 +1,7 @@
 import { type NextPage } from "next";
 import Head from "next/head";
 import Link from "next/link";
-import { LogInForm,InfoCard } from "../components";
+import { LogInForm, InfoCard } from "../components";
 import { useState } from "react";
 
 // file-based routing
@@ -16,7 +16,7 @@ const Home: NextPage = () => {
 
   return (
     <>
-      {!auth ? <LogInForm setAuth={setAuth}/>: <InfoCard setAuth={setAuth}/>}
+      {!auth ? <LogInForm setAuth={setAuth} /> : <InfoCard setAuth={setAuth} />}
     </>
   );
 };
