@@ -14,6 +14,10 @@ export class AuthError extends Error {
   }
 }
 
+const postLogIn = async (username: string, password: string) => {
+  if (username === "Birk") return { message: "Logged in successfully." }
+}
+
 /**
  * Send a post request to the server.
  * 
@@ -28,6 +32,8 @@ const logIn = async (username: string, password: string): Promise<void> => {
     //   // Request body must be serialisable.
     //   body: JSON.stringify({ username, password })
     // })
+
+    const requestLogInResponse = await postLogIn(username, password)
 
     setIsAuthenticated(true);
     localStorage.setItem("state", "true");
