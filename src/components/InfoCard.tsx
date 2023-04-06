@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
-import { LogInForm } from "./LogInForm";
+import AuthService from "~/services/AuthService";
 
 const promise = new Promise((resolve, reject) => {
   resolve("Done!");
@@ -35,7 +35,7 @@ const someAsyncJob = async (data: any) => {
 
 // Compile time vs. Run time
 
-export const InfoCard = ({setAuth}:{setAuth: ()=>void}) => {
+export const InfoCard = () => {
   const firstPage = 1;
 
   const [page, setPage] = useState(firstPage);
@@ -120,43 +120,43 @@ export const InfoCard = ({setAuth}:{setAuth: ()=>void}) => {
   //
 
   return (
-      <div className=" flex h-screen w-full flex-col items-center justify-center bg-slate-700">
-        <div className="flex h-80 w-80 flex-col items-center justify-between overflow-hidden rounded-xl bg-sky-500 pt-8 shadow-lg shadow-cyan-500/50">
-          <img
-            className="z-1 w-32 cursor-pointer rounded-full hover:opacity-80"
-            style={{ imageRendering: "pixelated", filter: "revert" }}
-            src={picture}
-            onClick={() => setDisplay(!display)}
-            alt=""
-          />
-          <div className="flex h-28 w-80 items-center bg-cyan-200 p-2">
-            <h1 className="hover:animate-moveIn">
-              {display && fullName}
-              <br />
-              {display && location}
-            </h1>
-          </div>
+    <div className=" flex h-screen w-full flex-col items-center justify-center bg-slate-700">
+      <div className="flex h-80 w-80 flex-col items-center justify-between overflow-hidden rounded-xl bg-sky-500 pt-8 shadow-lg shadow-cyan-500/50">
+        <img
+          className="z-1 w-32 cursor-pointer rounded-full hover:opacity-80"
+          style={{ imageRendering: "pixelated", filter: "revert" }}
+          src={picture}
+          onClick={() => setDisplay(!display)}
+          alt=""
+        />
+        <div className="flex h-28 w-80 items-center bg-cyan-200 p-2">
+          <h1 className="hover:animate-moveIn">
+            {display && fullName}
+            <br />
+            {display && location}
+          </h1>
         </div>
-        <div className="m-6">
-          <button
-            className="mx-2 rounded-3xl bg-violet-500 px-4 hover:bg-violet-600 focus:outline-none focus:ring focus:ring-violet-300 active:bg-violet-700"
-            onClick={handleClickPrevPage}
-          >
-            Prev Page
-          </button>
-          <button
-            className="mx-2 rounded-3xl bg-violet-500 px-4 hover:bg-violet-600 focus:outline-none focus:ring focus:ring-violet-300 active:bg-violet-700"
-            onClick={handleClickNextPage}
-          >
-            Next Page
-          </button>
-        </div>
+      </div>
+      <div className="m-6">
         <button
-          className="w-1/3 rounded-3xl bg-blue-600 hover:bg-blue-500"
-          onClick={() => setAuth(false)}
+          className="mx-2 rounded-3xl bg-violet-500 px-4 hover:bg-violet-600 focus:outline-none focus:ring focus:ring-violet-300 active:bg-violet-700"
+          onClick={handleClickPrevPage}
         >
-          LogOut
+          Prev Page
+        </button>
+        <button
+          className="mx-2 rounded-3xl bg-violet-500 px-4 hover:bg-violet-600 focus:outline-none focus:ring focus:ring-violet-300 active:bg-violet-700"
+          onClick={handleClickNextPage}
+        >
+          Next Page
         </button>
       </div>
+      <button
+        className="w-1/3 rounded-3xl bg-blue-600 hover:bg-blue-500"
+        onClick={() => AuthService.logOut()}
+      >
+        LogOut
+      </button>
+    </div>
   );
 };

@@ -12,10 +12,10 @@ const useForm = (initialValue: { [key: string]: any }) => {
         ...formValues,
         [event.currentTarget.name]: event.currentTarget.value,
       }),
-  ];
+  ] as const;
 };
 
-export const LogInForm = ({ setAuth }: { setAuth: () => void }) => {
+export const LogInForm = () => {
   const initialValue = {
     username: "",
     password: "",
@@ -59,22 +59,21 @@ export const LogInForm = ({ setAuth }: { setAuth: () => void }) => {
             className="text mt-3 w-full rounded-xl bg-blue-600 px-4 py-2 text-stone-300 hover:bg-blue-500"
             type="button"
             onClick={async event => {
-              try {
-                await AuthService.logIn(...formValues);
-              } catch (error) {
-                // if (typeof error === "string") {
-                //   setErrorMessage(error)
-                // } else if (
-                //   typeof error === "object"
-                //   && typeof Object.hasOwn(error, "message")
-                //   && typeof error.message === "string"
-                // ) {
-                //   setErrorMessage(error.message)
-                // } else {
-                //   setErrorMessage("Something went wrong.")
-                // }
-                setErrorMessage((error as Record<"message", string>).message)
+              // try {
+              //   await AuthService.logIn(formValues.username, formValues.password);
+              //   alert("Logged in.")
+              // } catch (error) {
+              //   alert("Failed to log in.")
+              //   setErrorMessage((error as Record<"message", string>).message)
+              // }
+
+              const isError = await AuthService.logIn(formValues.username, formValues.password);
+
+              if (isError) {
+                alert("Failed to log in.")
               }
+
+              alert("Logged in.")
             }}
           >
             Login

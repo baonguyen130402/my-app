@@ -3,6 +3,7 @@ import Head from "next/head";
 import Link from "next/link";
 import { LogInForm, InfoCard } from "../components";
 import { useState } from "react";
+import AuthService from "~/services/AuthService";
 
 // file-based routing
 // index->'/'
@@ -12,11 +13,9 @@ import { useState } from "react";
 // AUTH localhost:3000/login -> localhost:3000/
 
 const Home: NextPage = () => {
-  const [auth, setAuth] = useState(false);
-
   return (
     <>
-      {!auth ? <LogInForm setAuth={setAuth} /> : <InfoCard setAuth={setAuth} />}
+      {AuthService.isAuthenticated ? <LogInForm /> : <InfoCard />}
     </>
   );
 };

@@ -6,14 +6,6 @@ let isAuthenticated = initialState;
 
 const setIsAuthenticated = (newState: boolean) => isAuthenticated = newState;
 
-export class AuthError extends Error {
-  constructor(action: "LOG_IN" | "LOG_OUT", error: any) {
-    if (typeof error === "string") {
-      super(error)
-    } else super("Failed to log in.")
-  }
-}
-
 const postLogIn = async (username: string, password: string) => {
   if (username === "Birk") return { message: "Logged in successfully." }
 }
@@ -24,7 +16,7 @@ const postLogIn = async (username: string, password: string) => {
  * If the request succeeded, log the user in.
  * If failed, show error indicate what went wrong.
  */
-const logIn = async (username: string, password: string): Promise<void> => {
+const logIn = async (username: string, password: string): Promise<void | string> => {
   try {
     // POST credentials to the server
     // const requestLogInResponse = await fetch("/api/auth", {
@@ -33,14 +25,23 @@ const logIn = async (username: string, password: string): Promise<void> => {
     //   body: JSON.stringify({ username, password })
     // })
 
-    const requestLogInResponse = await postLogIn(username, password)
+    const responseLogInRequest = await postLogIn(username, password)
 
     setIsAuthenticated(true);
     localStorage.setItem("state", "true");
   } catch (error) {
-    throw new AuthError("LOG_IN", error)
+    return handleAuthError(error as { message: string })
   }
 };
+
+const handleAuthError = <TError extends { message: string }>(error: TError) => {
+  // Verify the shape of the error.
+  const errorMessage = error.message
+
+  // Determine action(s) in accordance with the error.
+
+  return errorMessage
+}
 
 const logOut = () => {
   setIsAuthenticated(false);
@@ -49,7 +50,13 @@ const logOut = () => {
 
 const AuthService = {
   logIn,
-  logOut
+  logOut,
+
+  get isAuthenticated() {
+    return isAuthenticated
+  },
+
+  // isAuthenticated: true
 }
 
 export default AuthService
