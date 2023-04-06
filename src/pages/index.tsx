@@ -15,7 +15,7 @@ import AuthService from "~/services/AuthService";
 const Home: NextPage = () => {
   return (
     <>
-      {AuthService.isAuthenticated ? <LogInForm /> : <InfoCard />}
+      {!AuthService.isAuthenticated ? <LogInForm /> : <InfoCard />}
     </>
   );
 };
