@@ -1,12 +1,17 @@
 import { type NextPage } from "next";
 import { useRouter } from "next/router";
+import AuthService from "~/services/AuthService";
+import { useEffect } from "react";
 
 const Welcome: NextPage = () => {
-  const router = useRouter()
+  const router = useRouter();
 
-  // router.push("/")
-  //
-  // redirect
+  useEffect(() => {
+    if (!AuthService.isAuthenticated) {
+      router.push("/");
+      console.log("User is not authenticated.");
+    }
+  }, []);
 
   return (
     <>

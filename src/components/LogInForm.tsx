@@ -29,10 +29,9 @@ export const LogInForm = () => {
       <div className="w-6/12 rounded-xl bg-white p-5 text-center text-black">
         <h1 className="mb-3 text-3xl font-bold">Login</h1>
 
-        <form >
+        <form>
           <div className="mb-3 flex flex-col items-start">
             {errorMessage && <h1>{`Error: ${errorMessage}`}</h1>}
-
 
             <label className="text-md mb-1 font-semibold">Email:</label>
             <input
@@ -58,7 +57,7 @@ export const LogInForm = () => {
           <button
             className="text mt-3 w-full rounded-xl bg-blue-600 px-4 py-2 text-stone-300 hover:bg-blue-500"
             type="button"
-            onClick={async event => {
+            onClick={async (event) => {
               // try {
               //   await AuthService.logIn(formValues.username, formValues.password);
               //   alert("Logged in.")
@@ -67,13 +66,14 @@ export const LogInForm = () => {
               //   setErrorMessage((error as Record<"message", string>).message)
               // }
 
-              const isError = await AuthService.logIn(formValues.username, formValues.password);
+              const isError = await AuthService.logIn(
+                formValues.username,
+                formValues.password
+              );
 
               if (isError) {
-                alert("Failed to log in.")
-              }
-
-              alert("Logged in.")
+                alert("Failed to log in.");
+              } else alert("Logged in.");
             }}
           >
             Login

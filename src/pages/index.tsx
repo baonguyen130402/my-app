@@ -13,11 +13,7 @@ import AuthService from "~/services/AuthService";
 // AUTH localhost:3000/login -> localhost:3000/
 
 const Home: NextPage = () => {
-  return (
-    <>
-      {!AuthService.isAuthenticated ? <LogInForm /> : <InfoCard />}
-    </>
-  );
+  return <>{!AuthService.isAuthenticated ? <LogInForm /> : <InfoCard />}</>;
 };
 
 export default Home;

@@ -1,2 +1,2 @@
-export  * from './InfoCard'
-export * from './LogInForm'
+export * from "./InfoCard";
+export * from "./LogInForm";
