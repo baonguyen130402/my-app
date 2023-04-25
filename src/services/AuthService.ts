@@ -60,8 +60,6 @@ const AuthService = {
   get isAuthenticated() {
     return isAuthenticated;
   },
-
-  // isAuthenticated: true,
 };
 
 export default AuthService;

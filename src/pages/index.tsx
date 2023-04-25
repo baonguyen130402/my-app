@@ -4,6 +4,7 @@ import Link from "next/link";
 import { LogInForm, InfoCard } from "../components";
 import { useState } from "react";
 import AuthService from "~/services/AuthService";
+import { DetailSection } from "~/components/DetailSection";
 
 // file-based routing
 // index->'/'
@@ -13,7 +14,8 @@ import AuthService from "~/services/AuthService";
 // AUTH localhost:3000/login -> localhost:3000/
 
 const Home: NextPage = () => {
-  return <>{!AuthService.isAuthenticated ? <LogInForm /> : <InfoCard />}</>;
+  // return <>{!AuthService.isAuthenticated ? <LogInForm /> : <InfoCard />}</>;
+  return <DetailSection />;
 };
 
 export default Home;

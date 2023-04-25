@@ -1,3 +1,4 @@
+import { useRouter } from "next/router";
 import { useState } from "react";
 import AuthService from "~/services/AuthService";
 
@@ -24,11 +25,13 @@ export const LogInForm = () => {
   const [formValues, setFormValues] = useForm(initialValue);
   const [errorMessage, setErrorMessage] = useState("");
 
+  const router = useRouter();
+
   return (
     <div className="fixed top-0 left-0 bottom-0 right-0 flex h-screen flex-col items-center justify-center bg-gray-500">
-      <div className="w-6/12 rounded-xl bg-white p-5 text-center text-black">
+      <div className="w-96 rounded-xl bg-white p-5 text-center text-black">
+        {" "}
         <h1 className="mb-3 text-3xl font-bold">Login</h1>
-
         <form>
           <div className="mb-3 flex flex-col items-start">
             {errorMessage && <h1>{`Error: ${errorMessage}`}</h1>}
@@ -58,14 +61,6 @@ export const LogInForm = () => {
             className="text mt-3 w-full rounded-xl bg-blue-600 px-4 py-2 text-stone-300 hover:bg-blue-500"
             type="button"
             onClick={async (event) => {
-              // try {
-              //   await AuthService.logIn(formValues.username, formValues.password);
-              //   alert("Logged in.")
-              // } catch (error) {
-              //   alert("Failed to log in.")
-              //   setErrorMessage((error as Record<"message", string>).message)
-              // }
-
               const isError = await AuthService.logIn(
                 formValues.username,
                 formValues.password
@@ -73,7 +68,10 @@ export const LogInForm = () => {
 
               if (isError) {
                 alert("Failed to log in.");
-              } else alert("Logged in.");
+              } else {
+                // alert("Logged in.");
+                router.push("/");
+              }
             }}
           >
             Login
