@@ -3,11 +3,13 @@ import AuthService from "~/services/AuthService";
 import axios from "axios";
 import { InfoCard } from "./InfoCard";
 import { useRouter } from "next/router";
+import { ListNumber } from './ListNumber'
 
 export const DetailSection = () => {
   const firstPage = 1;
-  const BigData: any[] = [];
 
+    const [data, setData] = useState([])
+    const BigData = []
   const router = useRouter();
 
   const [page, setPage] = useState(firstPage);
@@ -25,12 +27,13 @@ export const DetailSection = () => {
     const { title, first, last } = userData1.name;
     const { street, city, state, country } = userData1.location;
 
-    BigData.push({
+    setData([...data,{
       fullName: `${title}. ${first} ${last}`,
       location: `Address: ${street.number}, ${street.name} street, ${city} city, st. ${state}, ${country}`,
       picture: userData1.picture.thumbnail,
-    });
+    }]);
   }
+
 
   async function fetchDataUser2() {
     const response2 = await axios.get(
@@ -41,12 +44,14 @@ export const DetailSection = () => {
     const { title, first, last } = userData2.name;
     const { street, city, state, country } = userData2.location;
 
-    BigData.push({
+    setData([
+...data,{
       fullName: `${title}. ${first} ${last}`,
       location: `Address: ${street.number}, ${street.name} street, ${city} City, St. ${state}, ${country}`,
       picture: userData2.picture.thumbnail,
-    });
+    }]);
   }
+
 
   async function fetchDataUser3() {
     const response3 = await axios.get(
@@ -57,11 +62,13 @@ export const DetailSection = () => {
     const { title, first, last } = userData3.name;
     const { street, city, state, country } = userData3.location;
 
-    BigData.push({
+    setData([
+      ...data,
+      {
       fullName: `${title}. ${first} ${last}`,
       location: `Address: ${street.number}, ${street.name} street, ${city} City, St. ${state}, ${country}`,
       picture: userData3.picture.thumbnail,
-    });
+    }]);
   }
 
   useEffect(() => {
@@ -74,29 +81,18 @@ export const DetailSection = () => {
     }
   }, [page]);
 
-    console.log(BigData[0])
-    const dataTest = [
-        {fullName: "Nguyen", location: "Bien Hoa"},
-        {fullName: "Gia", location: "HCMC"},
-        {fullName: "Bao", location: "Binh Thanh"}
-    ]
-
-    console.log(dataTest)
-
-  const infoCard = () => {
-    BigData.map((user) => {
-      <InfoCard
-        FullName={user.fullName}
-        Location={user.location}
-        Picture={user.picture}
-      />;
-    });
-  };
+    console.log(data)
 
   return (
     <>
-      {infoCard}
-      <div>
+            {data.map((user) => {
+                <InfoCard
+                FullName={user.fullName}
+                Location={user.location}
+                Picture={user.picture}
+                />
+            })}
+       <div>
         <button
           className="rounded-l bg-gray-300 py-2 px-4 font-bold text-gray-800 hover:bg-gray-400"
           onClick={handleClickPrevPage}
