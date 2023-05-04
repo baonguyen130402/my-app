@@ -7,46 +7,43 @@ import { useRouter } from "next/router";
 export const DetailSection = () => {
   const firstPage = 1;
 
-  const [data, setData] = useState([]);
+  const [page, setPage] = useState(firstPage);
+  const [data, setData] = useState < { fullName: string, location: string, picture: string }[] > ([]);
+
   const router = useRouter();
 
-  const [page, setPage] = useState(firstPage);
-  const [picture, setPicture] = useState("");
-  const [fullName, setFullName] = useState("");
-  const [location, setLocation] = useState("");
-
-  const handleClickNextPage = () => setPage(page + 3);
+  const handleClickNextPage = () => setPage(page + 1);
   const handleClickPrevPage = () =>
-    page !== firstPage ? setPage(page - 3) : setPage(firstPage);
+    page !== firstPage ? setPage(page - 1) : setPage(firstPage);
 
-  async function fetchDataUser(API: string) {
-    const response = await axios.get(API);
+  async function fetchUserData(endpoint: string) {
+    const response1 = await axios.get(endpoint + page);
+    const response2 = await axios.get(endpoint + page + 1);
+    const response3 = await axios.get(endpoint + page + 2);
 
     const userData = response.data.results[0];
     const { title, first, last } = userData.name;
     const { street, city, state, country } = userData.location;
 
-    setLocation(
-      `Address: ${street.number}, ${street.name} street, ${city} City, St. ${state}, ${country}`
-    );
-    setPicture(userData.picture.thumbnail);
-    setFullName(`${title}. ${first} ${last}`);
+    console.log("fetchDataUser ", endpoint)
 
-    // setData([
-    //   ...data,
-    //   {
-    //     fullname: fullName,
-    //     location: location,
-    //     picture: picture,
-    //   },
-    // ]);
+    const location = `Address: ${street.number}, ${street.name} street, ${city} City, St. ${state}, ${country}`
+    const fullName = `${title}. ${first} ${last}`
+    const picture = userData.picture.thumbnail
+
+    setData([
+      {
+        fullName,
+        location,
+        picture,
+      },
+    ]);
   }
 
   useEffect(() => {
     try {
-      fetchDataUser(`https://randomuser.me/api?page=${firstPage}`);
-      // fetchDataUser(`https://randomuser.me/api?page=${firstPage + 1}`);
-      // fetchDataUser(`https://randomuser.me/api?page=${firstPage + 2}`);
+      // void fetchUserData(`https://randomuser.me/api?page=${firstPage}`);
+      void fetchUserData(`https://randomuser.me/api?page=`);
     } catch (error) {
       console.log(error);
     }
@@ -55,11 +52,11 @@ export const DetailSection = () => {
   return (
     <div className="flex h-screen w-full flex-col items-center justify-center bg-slate-700">
       <div className="grid w-4/5 grid-cols-3">
-        {/* {data.map((user, id) => { */}
-        {/*   return ( */}
-        <InfoCard fullName={fullName} location={location} picture={picture} />
-        {/*   ); */}
-        {/* })} */}
+        {data.map(({ fullName, location, picture }) => {
+          return (
+            <InfoCard key={fullName} fullName={fullName} location={location} picture={picture} />
+          );
+        })}
       </div>
       <div className="my-6 inline-flex">
         <button
