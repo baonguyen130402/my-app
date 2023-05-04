@@ -3,96 +3,65 @@ import AuthService from "~/services/AuthService";
 import axios from "axios";
 import { InfoCard } from "./InfoCard";
 import { useRouter } from "next/router";
-import { ListNumber } from './ListNumber'
 
 export const DetailSection = () => {
   const firstPage = 1;
 
-    const [data, setData] = useState([])
-    const BigData = []
+  const [data, setData] = useState([]);
   const router = useRouter();
 
   const [page, setPage] = useState(firstPage);
+  const [picture, setPicture] = useState("");
+  const [fullName, setFullName] = useState("");
+  const [location, setLocation] = useState("");
 
   const handleClickNextPage = () => setPage(page + 3);
   const handleClickPrevPage = () =>
     page !== firstPage ? setPage(page - 3) : setPage(firstPage);
 
-  async function fetchDataUser1() {
-    const response1 = await axios.get(
-      `https://randomuser.me/api?page=${firstPage}`
+  async function fetchDataUser(API: string) {
+    const response = await axios.get(API);
+
+    const userData = response.data.results[0];
+    const { title, first, last } = userData.name;
+    const { street, city, state, country } = userData.location;
+
+    setLocation(
+      `Address: ${street.number}, ${street.name} street, ${city} City, St. ${state}, ${country}`
     );
+    setPicture(userData.picture.thumbnail);
+    setFullName(`${title}. ${first} ${last}`);
 
-    const userData1 = response1.data.results[0];
-    const { title, first, last } = userData1.name;
-    const { street, city, state, country } = userData1.location;
-
-    setData([...data,{
-      fullName: `${title}. ${first} ${last}`,
-      location: `Address: ${street.number}, ${street.name} street, ${city} city, st. ${state}, ${country}`,
-      picture: userData1.picture.thumbnail,
-    }]);
-  }
-
-
-  async function fetchDataUser2() {
-    const response2 = await axios.get(
-      `https://randomuser.me/api?page=${firstPage + 1}`
-    );
-
-    const userData2 = response2.data.results[0];
-    const { title, first, last } = userData2.name;
-    const { street, city, state, country } = userData2.location;
-
-    setData([
-...data,{
-      fullName: `${title}. ${first} ${last}`,
-      location: `Address: ${street.number}, ${street.name} street, ${city} City, St. ${state}, ${country}`,
-      picture: userData2.picture.thumbnail,
-    }]);
-  }
-
-
-  async function fetchDataUser3() {
-    const response3 = await axios.get(
-      `https://randomuser.me/api?page=${firstPage + 2}`
-    );
-
-    const userData3 = response3.data.results[0];
-    const { title, first, last } = userData3.name;
-    const { street, city, state, country } = userData3.location;
-
-    setData([
-      ...data,
-      {
-      fullName: `${title}. ${first} ${last}`,
-      location: `Address: ${street.number}, ${street.name} street, ${city} City, St. ${state}, ${country}`,
-      picture: userData3.picture.thumbnail,
-    }]);
+    // setData([
+    //   ...data,
+    //   {
+    //     fullname: fullName,
+    //     location: location,
+    //     picture: picture,
+    //   },
+    // ]);
   }
 
   useEffect(() => {
     try {
-      fetchDataUser1();
-      fetchDataUser2();
-      fetchDataUser3();
+      fetchDataUser(`https://randomuser.me/api?page=${firstPage}`);
+      // fetchDataUser(`https://randomuser.me/api?page=${firstPage + 1}`);
+      // fetchDataUser(`https://randomuser.me/api?page=${firstPage + 2}`);
     } catch (error) {
       console.log(error);
     }
-  }, [page]);
-
-    console.log(data)
+  }, []);
 
   return (
-    <>
-            {data.map((user) => {
-                <InfoCard
-                FullName={user.fullName}
-                Location={user.location}
-                Picture={user.picture}
-                />
-            })}
-       <div>
+    <div className="flex h-screen w-full flex-col items-center justify-center bg-slate-700">
+      <div className="grid w-4/5 grid-cols-3">
+        {/* {data.map((user, id) => { */}
+        {/*   return ( */}
+        <InfoCard fullName={fullName} location={location} picture={picture} />
+        {/*   ); */}
+        {/* })} */}
+      </div>
+      <div className="my-6 inline-flex">
         <button
           className="rounded-l bg-gray-300 py-2 px-4 font-bold text-gray-800 hover:bg-gray-400"
           onClick={handleClickPrevPage}
@@ -116,6 +85,6 @@ export const DetailSection = () => {
       >
         Logout
       </button>
-    </>
+    </div>
   );
 };

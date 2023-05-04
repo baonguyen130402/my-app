@@ -38,32 +38,28 @@ const someAsyncJob = async (data: any) => {
 // Compile time vs. Run time
 
 export const InfoCard = (props: any) => {
-  const { FullName, Location, Picture } = props;
+  const { fullName, location, picture } = props;
   const [display, setDisplay] = useState(true);
 
   return (
-    <div className=" flex h-screen w-full flex-col items-center justify-center bg-slate-700">
-      <div className="grid w-4/5 grid-cols-3">
-        <figure className="mx-auto w-2/3 rounded-xl bg-slate-100 p-8 dark:bg-slate-800">
-          <img
-            className="mx-auto h-24 w-24 rounded-full"
-            src={Picture}
-            onClick={() => setDisplay(!display)}
-            width="384"
-            height="512"
-          />
-          <div className="space-y-4 pt-6 text-center">
-            <blockquote>
-              <p className="text-lg font-medium">{display && FullName}</p>
-            </blockquote>
-            <figcaption className="font-medium">
-              <div className="text-slate-700 dark:text-slate-500">
-                {display && Location}
-              </div>
-            </figcaption>
+    <figure className="mx-auto w-2/3 rounded-xl bg-slate-100 p-8 dark:bg-slate-800">
+      <img
+        className="mx-auto h-24 w-24 rounded-full"
+        src={picture}
+        onClick={() => setDisplay(!display)}
+        width="384"
+        height="512"
+      />
+      <div className="space-y-4 pt-6 text-center">
+        <blockquote>
+          <p className="text-lg font-medium">{display && fullName}</p>
+        </blockquote>
+        <figcaption className="font-medium">
+          <div className="text-slate-700 dark:text-slate-500">
+            {display && location}
           </div>
-        </figure>
+        </figcaption>
       </div>
-    </div>
+    </figure>
   );
 };
