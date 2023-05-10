@@ -16,7 +16,7 @@ export const DetailSection = () => {
   const handleClickPrevPage = () =>
     page !== firstPage ? setPage(page - 1) : setPage(firstPage);
 
-  async function fetchUserData(endpoint: string) {
+  async function fetchUserData(endpoint: string, page: number) {
     const response1 = await axios.get(endpoint + page);
     const response2 = await axios.get(endpoint + page + 1);
     const response3 = await axios.get(endpoint + page + 2);
@@ -47,11 +47,12 @@ export const DetailSection = () => {
   useEffect(() => {
     try {
       // void fetchUserData(`https://randomuser.me/api?page=${firstPage}`);
-      void fetchUserData(`https://randomuser.me/api?page=`);
+      console.log('Ran.');
+      void fetchUserData(`https://randomuser.me/api?page=`, page);
     } catch (error) {
       console.log(error);
     }
-  }, []);
+  }, [page]);
 
   return (
     <div className="flex h-screen w-full flex-col items-center justify-center bg-slate-700">
