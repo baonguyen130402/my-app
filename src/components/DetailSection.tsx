@@ -21,23 +21,27 @@ export const DetailSection = () => {
     const response2 = await axios.get(endpoint + page + 1);
     const response3 = await axios.get(endpoint + page + 2);
 
-    const userData = response.data.results[0];
-    const { title, first, last } = userData.name;
-    const { street, city, state, country } = userData.location;
+    const allRes = [response1, response2, response3]
 
-    console.log("fetchDataUser ", endpoint)
+    const a = allRes.map(response => {
+      const userData = response.data.results[0];
+      const { title, first, last } = userData.name;
+      const { street, city, state, country } = userData.location;
 
-    const location = `Address: ${street.number}, ${street.name} street, ${city} City, St. ${state}, ${country}`
-    const fullName = `${title}. ${first} ${last}`
-    const picture = userData.picture.thumbnail
+      const location = `Address: ${street.number}, ${street.name} street, ${city} City, St. ${state}, ${country}`
+      const fullName = `${title}. ${first} ${last}`
+      const picture = userData.picture.thumbnail
 
-    setData([
-      {
+      return {
         fullName,
         location,
         picture,
-      },
-    ]);
+      }
+    })
+
+    console.log("fetchDataUser ", endpoint)
+
+    setData(a);
   }
 
   useEffect(() => {
