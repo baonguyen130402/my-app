@@ -38,14 +38,14 @@ const someAsyncJob = async (data: any) => {
 // Compile time vs. Run time
 
 export const InfoCard = (props: any) => {
-  const { fullName, location, picture } = props;
+  const { fullName, location, avatar } = props;
   const [display, setDisplay] = useState(true);
 
   return (
     <figure className="mx-auto w-2/3 rounded-xl bg-slate-100 p-8 dark:bg-slate-800">
       <img
         className="mx-auto h-24 w-24 rounded-full"
-        src={picture}
+        src={avatar}
         onClick={() => setDisplay(!display)}
         width="384"
         height="512"

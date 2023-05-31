@@ -5,61 +5,138 @@ import { InfoCard } from "./InfoCard";
 import { useRouter } from "next/router";
 
 export const DetailSection = () => {
-  const firstPage = 1;
+  const firstPage = 0;
+  const limit = 20;
 
   const [page, setPage] = useState(firstPage);
-  const [data, setData] = useState < { fullName: string, location: string, picture: string }[] > ([]);
+  const [userDataFetched, setUserDataFetched] = useState(0);
+
+  const [data, setData] = useState<
+    { fullName: string; location: string; avatar: string }[]
+  >([]);
+
+  const [dataNextPage, setDataNextPage] = useState<
+    { fullName: string; location: string; avatar: string }[]
+  >([]);
 
   const router = useRouter();
 
-  const handleClickNextPage = () => setPage(page + 1);
+  const handleClickNextPage = () =>
+    page !== 100 ? setPage(page + 20) : setPage(100);
+
   const handleClickPrevPage = () =>
-    page !== firstPage ? setPage(page - 1) : setPage(firstPage);
+    page !== firstPage ? setPage(page - 20) : setPage(firstPage);
 
   async function fetchUserData(endpoint: string, page: number) {
-    const response1 = await axios.get(endpoint + page);
-    const response2 = await axios.get(endpoint + page + 1);
-    const response3 = await axios.get(endpoint + page + 2);
+    const allRes = await Promise.all([axios.get(endpoint)]);
 
-    const allRes = [response1, response2, response3]
+    const a = allRes.map((response) => {
+      const userData = response.data.users;
 
-    const a = allRes.map(response => {
-      const userData = response.data.results[0];
-      const { title, first, last } = userData.name;
-      const { street, city, state, country } = userData.location;
+      let location, fullName, avatar;
 
-      const location = `Address: ${street.number}, ${street.name} street, ${city} City, St. ${state}, ${country}`
-      const fullName = `${title}. ${first} ${last}`
-      const picture = userData.picture.thumbnail
+      const dataGetFromEndpoint = userData.filter((_, idx) => idx < 20);
 
-      return {
-        fullName,
-        location,
-        picture,
-      }
-    })
+      const dataRender = dataGetFromEndpoint.map((_, index) => {
+        const userData = response.data.users[index];
+        const { address, city } = userData.address;
 
-    console.log("fetchDataUser ", endpoint)
+        location = `Address: ${address}, ${city}`;
+        fullName = `${userData.firstName} ${userData.lastName}`;
+        avatar = userData.image;
 
-    setData(a);
+        return {
+          fullName,
+          location,
+          avatar,
+        };
+      });
+
+      page === 0
+        ? setData(dataRender)
+        : setData(() => {
+            const result = dataNextPage.slice(page, page + 20);
+
+            return result;
+          });
+
+      userDataFetched !== 100
+        ? setUserDataFetched(userDataFetched + 20)
+        : setUserDataFetched(100);
+    });
+  }
+
+  async function fetchUserDataInNextPage(endpoint: string, page: number) {
+    const allRes = await Promise.all([axios.get(endpoint)]);
+
+    const a = allRes.map((response) => {
+      const userData = response.data.users;
+
+      let location, fullName, avatar;
+
+      const dataGetFromEndpoint = userData.filter((_, idx) => idx < 20);
+
+      const dataRender = dataGetFromEndpoint.map((_, index) => {
+        const userData = response.data.users[index];
+        const { address, city } = userData.address;
+
+        location = `Address: ${address}, ${city}`;
+        fullName = `${userData.firstName} ${userData.lastName}`;
+        avatar = userData.image;
+
+        return {
+          fullName,
+          location,
+          avatar,
+        };
+      });
+
+      setDataNextPage([...data, ...dataRender]);
+    });
   }
 
   useEffect(() => {
     try {
-      // void fetchUserData(`https://randomuser.me/api?page=${firstPage}`);
-      console.log('Ran.');
-      void fetchUserData(`https://randomuser.me/api?page=`, page);
+      page !== 100
+        ? void fetchUserData(
+            `https://dummyjson.com/users?skip=${page}&limit=${limit}`,
+            page
+          )
+        : void fetchUserData(
+            `https://dummyjson.com/users?skip=${page - 20}&limit=${limit}`,
+            page
+          );
+
+      userDataFetched !== 100
+        ? fetchUserDataInNextPage(
+            `https://dummyjson.com/users?skip=${userDataFetched}&limit=${limit}`,
+            page
+          )
+        : fetchUserDataInNextPage(
+            `https://dummyjson.com/users?skip=${
+              userDataFetched - 20
+            }&limit=${limit}`,
+            page
+          );
     } catch (error) {
       console.log(error);
     }
   }, [page]);
 
+  console.log(dataNextPage);
+  console.log(userDataFetched);
+
   return (
-    <div className="flex h-screen w-full flex-col items-center justify-center bg-slate-700">
-      <div className="grid w-4/5 grid-cols-3">
-        {data.map(({ fullName, location, picture }) => {
+    <div className="flex h-full w-full flex-col items-center justify-center bg-slate-700">
+      <div className="grid w-4/5 grid-cols-5 gap-y-6">
+        {data.map(({ fullName, location, avatar }) => {
           return (
-            <InfoCard key={fullName} fullName={fullName} location={location} picture={picture} />
+            <InfoCard
+              key={fullName}
+              fullName={fullName}
+              location={location}
+              avatar={avatar}
+            />
           );
         })}
       </div>
