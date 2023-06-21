@@ -9,7 +9,6 @@ export const DetailSection = () => {
   const limit = 20;
 
   const [page, setPage] = useState(firstPage);
-  const [userDataFetched, setUserDataFetched] = useState(0);
 
   const [data, setData] = useState<
     { fullName: string; location: string; avatar: string }[]
@@ -21,6 +20,8 @@ export const DetailSection = () => {
 
   const router = useRouter();
 
+  const delay = (ms: number) => new Promise((res) => setTimeout(res, ms));
+
   const handleClickNextPage = () =>
     page !== 100 ? setPage(page + 20) : setPage(100);
 
@@ -28,6 +29,7 @@ export const DetailSection = () => {
     page !== firstPage ? setPage(page - 20) : setPage(firstPage);
 
   async function fetchUserData(endpoint: string, page: number) {
+    await delay(3000);
     const allRes = await Promise.all([axios.get(endpoint)]);
 
     const a = allRes.map((response) => {
@@ -59,10 +61,7 @@ export const DetailSection = () => {
 
             return result;
           });
-
-      userDataFetched !== 100
-        ? setUserDataFetched(userDataFetched + 20)
-        : setUserDataFetched(100);
+      console.log(data);
     });
   }
 
@@ -91,11 +90,16 @@ export const DetailSection = () => {
         };
       });
 
-      setDataNextPage([...data, ...dataRender]);
+      dataNextPage === null
+        ? setDataNextPage([...data, ...dataRender])
+        : setDataNextPage([...dataNextPage, ...dataRender]);
+      console.log(dataNextPage);
     });
   }
 
   useEffect(() => {
+    console.log("page");
+
     try {
       page !== 100
         ? void fetchUserData(
@@ -106,25 +110,28 @@ export const DetailSection = () => {
             `https://dummyjson.com/users?skip=${page - 20}&limit=${limit}`,
             page
           );
-
-      userDataFetched !== 100
-        ? fetchUserDataInNextPage(
-            `https://dummyjson.com/users?skip=${userDataFetched}&limit=${limit}`,
-            page
-          )
-        : fetchUserDataInNextPage(
-            `https://dummyjson.com/users?skip=${
-              userDataFetched - 20
-            }&limit=${limit}`,
-            page
-          );
     } catch (error) {
       console.log(error);
     }
   }, [page]);
 
-  console.log(dataNextPage);
-  console.log(userDataFetched);
+  useEffect(() => {
+    console.log("data");
+
+    try {
+      page !== 100
+        ? void fetchUserDataInNextPage(
+            `https://dummyjson.com/users?skip=${page + 20}&limit=${limit}`,
+            page
+          )
+        : void fetchUserDataInNextPage(
+            `https://dummyjson.com/users?skip=${page - 20}&limit=${limit}`,
+            page
+          );
+    } catch (error) {
+      console.log(error);
+    }
+  }, [data]);
 
   return (
     <div className="flex h-full w-full flex-col items-center justify-center bg-slate-700">
