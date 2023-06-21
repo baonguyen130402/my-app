@@ -1,8 +1,12 @@
 import { useEffect, useState } from "react";
-import AuthService from "~/services/AuthService";
-import axios from "axios";
-import { InfoCard } from "./InfoCard";
 import { useRouter } from "next/router";
+
+import AuthService from "~/services/AuthService";
+import { InfoCard } from "./InfoCard";
+
+import axios from "axios";
+
+const ITEMS_PER_PAGE = 20;
 
 export const DetailSection = () => {
   const firstPage = 0;
@@ -30,9 +34,10 @@ export const DetailSection = () => {
 
   async function fetchUserData(endpoint: string, page: number) {
     await delay(3000);
-    const allRes = await Promise.all([axios.get(endpoint)]);
+    // const allRes = await Promise.all([axios.get(endpoint)]);
+    const allRes = await axios.get(endpoint);
 
-    const a = allRes.map((response) => {
+    const a = [allRes].map((response) => {
       const userData = response.data.users;
 
       let location, fullName, avatar;
@@ -54,14 +59,12 @@ export const DetailSection = () => {
         };
       });
 
-      page === 0
-        ? setData(dataRender)
-        : setData(() => {
-            const result = dataNextPage.slice(page, page + 20);
+      const r = page === 0
+        ? dataRender
+        : dataNextPage.slice(page, page + 20);
+      setData(r);
 
-            return result;
-          });
-      console.log(data);
+      console.log(r);
     });
   }
 
@@ -98,6 +101,7 @@ export const DetailSection = () => {
   }
 
   useEffect(() => {
+    console.log("--- ---");
     console.log("page");
 
     try {
@@ -117,21 +121,24 @@ export const DetailSection = () => {
 
   useEffect(() => {
     console.log("data");
+    console.log(page, data);
 
-    try {
-      page !== 100
-        ? void fetchUserDataInNextPage(
-            `https://dummyjson.com/users?skip=${page + 20}&limit=${limit}`,
-            page
-          )
-        : void fetchUserDataInNextPage(
-            `https://dummyjson.com/users?skip=${page - 20}&limit=${limit}`,
-            page
-          );
-    } catch (error) {
-      console.log(error);
+    if (data.length !==0) {
+      try {
+        page < 100 // There are only 100 items.
+          ? void fetchUserDataInNextPage(
+              `https://dummyjson.com/users?skip=${page + 20}&limit=${limit}`,
+              page
+            )
+          : void fetchUserDataInNextPage(
+              `https://dummyjson.com/users?skip=${page - 20}&limit=${limit}`,
+              page
+            );
+      } catch (error) {
+        console.log(error);
+      }
     }
-  }, [data]);
+  }, [page, data]);
 
   return (
     <div className="flex h-full w-full flex-col items-center justify-center bg-slate-700">

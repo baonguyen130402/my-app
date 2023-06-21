@@ -9,7 +9,7 @@ const setIsAuthenticated = (newState: boolean) => (isAuthenticated = newState);
 const postLogIn = async (username: string, password: string) => {
   if (username === "Birk" && password === "021304")
     return { message: "Logged in successfully." };
-  else throw new error("400");
+  else throw new Error("400");
 };
 
 /**
