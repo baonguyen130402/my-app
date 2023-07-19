@@ -10,9 +10,10 @@ const ITEMS_PER_PAGE = 20;
 
 export const DetailSection = () => {
   const firstPage = 0;
-  const limit = 20;
-
+  const limit = ITEMS_PER_PAGE;
   const [page, setPage] = useState(firstPage);
+  const [fetchState, setFetchState] = useState(true);
+  const [dataInput, setDataInput] = useState("");
 
   const [data, setData] = useState<
     { fullName: string; location: string; avatar: string }[]
@@ -24,17 +25,31 @@ export const DetailSection = () => {
 
   const router = useRouter();
 
-  const delay = (ms: number) => new Promise((res) => setTimeout(res, ms));
+  const handleClickNextPage = () => {
+    page < 100 ? setPage(page + ITEMS_PER_PAGE) : setPage(100);
 
-  const handleClickNextPage = () =>
-    page !== 100 ? setPage(page + 20) : setPage(100);
+    page < 80
+      ? setData(
+        dataNextPage.slice(page + ITEMS_PER_PAGE, page + ITEMS_PER_PAGE + 20),
+      )
+      : alert("Oops!");
 
-  const handleClickPrevPage = () =>
-    page !== firstPage ? setPage(page - 20) : setPage(firstPage);
+    setFetchState(true);
+  };
+
+  const handleClickPrevPage = () => {
+    page !== firstPage ? setPage(page - ITEMS_PER_PAGE) : setPage(firstPage);
+
+    if (page < firstPage) alert("Oops! This is first page");
+
+    if (page < dataNextPage.length) {
+      setData(dataNextPage.slice(page - ITEMS_PER_PAGE, page));
+    }
+
+    setFetchState(false);
+  };
 
   async function fetchUserData(endpoint: string, page: number) {
-    await delay(3000);
-    // const allRes = await Promise.all([axios.get(endpoint)]);
     const allRes = await axios.get(endpoint);
 
     const a = [allRes].map((response) => {
@@ -42,9 +57,11 @@ export const DetailSection = () => {
 
       let location, fullName, avatar;
 
-      const dataGetFromEndpoint = userData.filter((_, idx) => idx < 20);
+      const dataGetFromEndpoint = userData.filter(
+        (_: any, idx: number) => idx < ITEMS_PER_PAGE,
+      );
 
-      const dataRender = dataGetFromEndpoint.map((_, index) => {
+      const dataRender = dataGetFromEndpoint.map((_: any, index: number) => {
         const userData = response.data.users[index];
         const { address, city } = userData.address;
 
@@ -59,26 +76,27 @@ export const DetailSection = () => {
         };
       });
 
-      const r = page === 0
+      const result = page === 0
         ? dataRender
-        : dataNextPage.slice(page, page + 20);
-      setData(r);
+        : dataNextPage.slice(page, page + ITEMS_PER_PAGE);
 
-      console.log(r);
+      setData(result);
     });
   }
 
   async function fetchUserDataInNextPage(endpoint: string, page: number) {
     const allRes = await Promise.all([axios.get(endpoint)]);
 
-    const a = allRes.map((response) => {
+    const a = allRes.map((response: any) => {
       const userData = response.data.users;
 
       let location, fullName, avatar;
 
-      const dataGetFromEndpoint = userData.filter((_, idx) => idx < 20);
+      const dataGetFromEndpoint = userData.filter(
+        (_: any, idx: number) => idx < ITEMS_PER_PAGE,
+      );
 
-      const dataRender = dataGetFromEndpoint.map((_, index) => {
+      const dataRender = dataGetFromEndpoint.map((_: any, index: number) => {
         const userData = response.data.users[index];
         const { address, city } = userData.address;
 
@@ -93,55 +111,106 @@ export const DetailSection = () => {
         };
       });
 
-      dataNextPage === null
-        ? setDataNextPage([...data, ...dataRender])
-        : setDataNextPage([...dataNextPage, ...dataRender]);
-      console.log(dataNextPage);
+      const result = dataNextPage.length === 0
+        ? [...data, ...dataRender]
+        : [...dataNextPage, ...dataRender];
+
+      setDataNextPage(result);
+    });
+  }
+
+  async function userDataSearched(endpoint: string) {
+    const allRes = await Promise.all([axios.get(endpoint)]);
+
+    const a = allRes.map((response: any) => {
+      const userData = response.data.users;
+
+      let location, fullName, avatar;
+
+      const dataGetFromEndpoint = userData.filter(
+        (_: any, idx: number) => idx < ITEMS_PER_PAGE,
+      );
+
+      const dataRender = dataGetFromEndpoint.map((_: any, index: number) => {
+        const userData = response.data.users[index];
+        const { address, city } = userData.address;
+
+        location = `Address: ${address}, ${city}`;
+        fullName = `${userData.firstName} ${userData.lastName}`;
+        avatar = userData.image;
+
+        return {
+          fullName,
+          location,
+          avatar,
+        };
+      });
+
+
+      setData(dataRender);
     });
   }
 
   useEffect(() => {
-    console.log("--- ---");
-    console.log("page");
-
     try {
-      page !== 100
-        ? void fetchUserData(
-            `https://dummyjson.com/users?skip=${page}&limit=${limit}`,
-            page
-          )
-        : void fetchUserData(
-            `https://dummyjson.com/users?skip=${page - 20}&limit=${limit}`,
-            page
-          );
+      if (page === 0 && fetchState) {
+        void fetchUserData(
+          `https://dummyjson.com/users?skip=${page}&limit=${limit}`,
+          page,
+        );
+      }
     } catch (error) {
       console.log(error);
     }
   }, [page]);
 
   useEffect(() => {
-    console.log("data");
-    console.log(page, data);
-
-    if (data.length !==0) {
+    if (data.length !== 0 && fetchState) {
       try {
         page < 100 // There are only 100 items.
           ? void fetchUserDataInNextPage(
-              `https://dummyjson.com/users?skip=${page + 20}&limit=${limit}`,
-              page
-            )
+            `https://dummyjson.com/users?skip=${
+              page + ITEMS_PER_PAGE
+            }&limit=${limit}`,
+            page,
+          )
           : void fetchUserDataInNextPage(
-              `https://dummyjson.com/users?skip=${page - 20}&limit=${limit}`,
-              page
-            );
+            `https://dummyjson.com/users?skip=${
+              page - ITEMS_PER_PAGE
+            }&limit=${limit}`,
+            page,
+          );
       } catch (error) {
         console.log(error);
       }
     }
   }, [page, data]);
 
+  useEffect(() => {
+    try {
+      void userDataSearched(
+        `https://dummyjson.com/users/search?q=${dataInput}`,
+      );
+    } catch (error) {
+      console.log(error);
+    }
+  }, [dataInput]);
+
   return (
     <div className="flex h-full w-full flex-col items-center justify-center bg-slate-700">
+      <div className="mb-4 w-72 p-4">
+        <div className="relative h-10 w-full min-w-[200px]">
+          <input
+            className="border-blue-gray-200 text-blue-gray-700 placeholder-shown:border-blue-gray-200 placeholder-shown:border-t-blue-gray-200 disabled:bg-blue-gray-50 peer h-full w-full rounded-[7px] border border-t-transparent bg-transparent px-3 py-2.5 font-sans text-sm font-normal outline outline-0 transition-all placeholder-shown:border focus:border-2 focus:border-pink-500 focus:border-t-transparent focus:outline-0 disabled:border-0"
+            placeholder=""
+            value={dataInput}
+            onChange={(event) => setDataInput(event.target.value)}
+          />
+          <label className="before:content[' '] after:content[' '] text-blue-gray-400 before:border-blue-gray-200 after:border-blue-gray-200 peer-placeholder-shown:text-blue-gray-500 peer-disabled:peer-placeholder-shown:text-blue-gray-500 pointer-events-none absolute left-0 -top-1.5 flex h-full w-full select-none text-[11px] font-normal leading-tight transition-all before:pointer-events-none before:mt-[6.5px] before:mr-1 before:box-border before:block before:h-1.5 before:w-2.5 before:rounded-tl-md before:border-t before:border-l before:transition-all after:pointer-events-none after:mt-[6.5px] after:ml-1 after:box-border after:block after:h-1.5 after:w-2.5 after:flex-grow after:rounded-tr-md after:border-t after:border-r after:transition-all peer-placeholder-shown:text-sm peer-placeholder-shown:leading-[3.75] peer-placeholder-shown:before:border-transparent peer-placeholder-shown:after:border-transparent peer-focus:text-[11px] peer-focus:leading-tight peer-focus:text-pink-500 peer-focus:before:border-t-2 peer-focus:before:border-l-2 peer-focus:before:border-pink-500 peer-focus:after:border-t-2 peer-focus:after:border-r-2 peer-focus:after:border-pink-500 peer-disabled:text-transparent peer-disabled:before:border-transparent peer-disabled:after:border-transparent">
+            Search
+          </label>
+        </div>
+      </div>
       <div className="grid w-4/5 grid-cols-5 gap-y-6">
         {data.map(({ fullName, location, avatar }) => {
           return (
