@@ -7,6 +7,7 @@ import { InfoCard } from "./InfoCard";
 import axios from "axios";
 
 const ITEMS_PER_PAGE = 20;
+const MAX = 100;
 
 export const DetailSection = () => {
   const firstPage = 0;
@@ -29,13 +30,13 @@ export const DetailSection = () => {
   const [dataLatestPage, setDataLatestPage] = useState(dataRender);
 
   const handleClickNextPage = () => {
-    page < 100 ? setPage(page + ITEMS_PER_PAGE) : setPage(100);
+    page < MAX ? setPage(page + ITEMS_PER_PAGE) : setPage(MAX);
 
-    page < 80
+    page < (MAX - 20)
       ? setDataRender(
         data.slice(page + ITEMS_PER_PAGE, page + ITEMS_PER_PAGE + 20),
       )
-      : alert("Oops!");
+      : alert("Oops! This is last page");
 
     setFetchState(true);
     setDataLatestPage(
@@ -44,11 +45,11 @@ export const DetailSection = () => {
   };
 
   const handleClickPrevPage = () => {
-    page !== firstPage ? setPage(page - ITEMS_PER_PAGE) : setPage(firstPage);
+    page === firstPage
+      ? alert("Oops! This is first page")
+      : setPage(page - ITEMS_PER_PAGE);
 
-    if (page < firstPage) alert("Oops! This is first page");
-
-    if (page < data.length) {
+    if (page < MAX && page !== 0) {
       setDataRender(data.slice(page - ITEMS_PER_PAGE, page));
     }
 
@@ -122,7 +123,7 @@ export const DetailSection = () => {
         const result = data.length === 0
           ? [...dataRender, ...dataFetched]
           : [...data, ...dataFetched];
-        
+
         setData(result);
       }
     });
