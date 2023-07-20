@@ -11,30 +11,36 @@ const ITEMS_PER_PAGE = 20;
 export const DetailSection = () => {
   const firstPage = 0;
   const limit = ITEMS_PER_PAGE;
+
+  const router = useRouter();
+
   const [page, setPage] = useState(firstPage);
   const [fetchState, setFetchState] = useState(true);
   const [dataInput, setDataInput] = useState("");
+
+  const [dataRender, setDataRender] = useState<
+    { fullName: string; location: string; avatar: string }[]
+  >([]);
 
   const [data, setData] = useState<
     { fullName: string; location: string; avatar: string }[]
   >([]);
 
-  const [dataNextPage, setDataNextPage] = useState<
-    { fullName: string; location: string; avatar: string }[]
-  >([]);
-
-  const router = useRouter();
+  const [dataLatestPage, setDataLatestPage] = useState(dataRender);
 
   const handleClickNextPage = () => {
     page < 100 ? setPage(page + ITEMS_PER_PAGE) : setPage(100);
 
     page < 80
-      ? setData(
-        dataNextPage.slice(page + ITEMS_PER_PAGE, page + ITEMS_PER_PAGE + 20),
+      ? setDataRender(
+        data.slice(page + ITEMS_PER_PAGE, page + ITEMS_PER_PAGE + 20),
       )
       : alert("Oops!");
 
     setFetchState(true);
+    setDataLatestPage(
+      data.slice(page + ITEMS_PER_PAGE, page + ITEMS_PER_PAGE + 20),
+    );
   };
 
   const handleClickPrevPage = () => {
@@ -42,17 +48,18 @@ export const DetailSection = () => {
 
     if (page < firstPage) alert("Oops! This is first page");
 
-    if (page < dataNextPage.length) {
-      setData(dataNextPage.slice(page - ITEMS_PER_PAGE, page));
+    if (page < data.length) {
+      setDataRender(data.slice(page - ITEMS_PER_PAGE, page));
     }
 
     setFetchState(false);
+    setDataLatestPage(data.slice(page - ITEMS_PER_PAGE, page));
   };
 
   async function fetchUserData(endpoint: string, page: number) {
     const allRes = await axios.get(endpoint);
 
-    const a = [allRes].map((response) => {
+    const fetchData = [allRes].map((response) => {
       const userData = response.data.users;
 
       let location, fullName, avatar;
@@ -61,7 +68,7 @@ export const DetailSection = () => {
         (_: any, idx: number) => idx < ITEMS_PER_PAGE,
       );
 
-      const dataRender = dataGetFromEndpoint.map((_: any, index: number) => {
+      const dataFetched = dataGetFromEndpoint.map((_: any, index: number) => {
         const userData = response.data.users[index];
         const { address, city } = userData.address;
 
@@ -77,17 +84,17 @@ export const DetailSection = () => {
       });
 
       const result = page === 0
-        ? dataRender
-        : dataNextPage.slice(page, page + ITEMS_PER_PAGE);
+        ? dataFetched
+        : data.slice(page, page + ITEMS_PER_PAGE);
 
-      setData(result);
+      setDataRender(result);
     });
   }
 
   async function fetchUserDataInNextPage(endpoint: string, page: number) {
     const allRes = await Promise.all([axios.get(endpoint)]);
 
-    const a = allRes.map((response: any) => {
+    const fetchData = allRes.map((response: any) => {
       const userData = response.data.users;
 
       let location, fullName, avatar;
@@ -96,7 +103,7 @@ export const DetailSection = () => {
         (_: any, idx: number) => idx < ITEMS_PER_PAGE,
       );
 
-      const dataRender = dataGetFromEndpoint.map((_: any, index: number) => {
+      const dataFetched = dataGetFromEndpoint.map((_: any, index: number) => {
         const userData = response.data.users[index];
         const { address, city } = userData.address;
 
@@ -111,18 +118,20 @@ export const DetailSection = () => {
         };
       });
 
-      const result = dataNextPage.length === 0
-        ? [...data, ...dataRender]
-        : [...dataNextPage, ...dataRender];
-
-      setDataNextPage(result);
+      if (data.length < 100) {
+        const result = data.length === 0
+          ? [...dataRender, ...dataFetched]
+          : [...data, ...dataFetched];
+        
+        setData(result);
+      }
     });
   }
 
   async function userDataSearched(endpoint: string) {
     const allRes = await Promise.all([axios.get(endpoint)]);
 
-    const a = allRes.map((response: any) => {
+    const fetchData = allRes.map((response: any) => {
       const userData = response.data.users;
 
       let location, fullName, avatar;
@@ -131,7 +140,7 @@ export const DetailSection = () => {
         (_: any, idx: number) => idx < ITEMS_PER_PAGE,
       );
 
-      const dataRender = dataGetFromEndpoint.map((_: any, index: number) => {
+      const dataFetched = dataGetFromEndpoint.map((_: any, index: number) => {
         const userData = response.data.users[index];
         const { address, city } = userData.address;
 
@@ -146,8 +155,9 @@ export const DetailSection = () => {
         };
       });
 
-
-      setData(dataRender);
+      dataInput.split("").length === 0 && data.length > 40
+        ? setDataRender(dataLatestPage)
+        : setDataRender(dataFetched);
     });
   }
 
@@ -165,7 +175,7 @@ export const DetailSection = () => {
   }, [page]);
 
   useEffect(() => {
-    if (data.length !== 0 && fetchState) {
+    if (dataRender.length !== 0 && fetchState) {
       try {
         page < 100 // There are only 100 items.
           ? void fetchUserDataInNextPage(
@@ -184,12 +194,12 @@ export const DetailSection = () => {
         console.log(error);
       }
     }
-  }, [page, data]);
+  }, [page, dataRender]);
 
   useEffect(() => {
     try {
       void userDataSearched(
-        `https://dummyjson.com/users/search?q=${dataInput}`,
+        `https://dummyjson.com/users/search?q=${encodeURIComponent(dataInput)}`,
       );
     } catch (error) {
       console.log(error);
@@ -212,7 +222,7 @@ export const DetailSection = () => {
         </div>
       </div>
       <div className="grid w-4/5 grid-cols-5 gap-y-6">
-        {data.map(({ fullName, location, avatar }) => {
+        {dataRender.map(({ fullName, location, avatar }) => {
           return (
             <InfoCard
               key={fullName}
