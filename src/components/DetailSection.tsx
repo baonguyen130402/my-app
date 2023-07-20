@@ -27,7 +27,7 @@ export const DetailSection = () => {
     { fullName: string; location: string; avatar: string }[]
   >([]);
 
-  const [dataLatestPage, setDataLatestPage] = useState(dataRender);
+  // const [dataLatestPage, setDataLatestPage] = useState(dataRender);
 
   const handleClickNextPage = () => {
     page < MAX ? setPage(page + ITEMS_PER_PAGE) : setPage(MAX);
@@ -38,10 +38,12 @@ export const DetailSection = () => {
       )
       : alert("Oops! This is last page");
 
+    console.log(page);
+
     setFetchState(true);
-    setDataLatestPage(
-      data.slice(page + ITEMS_PER_PAGE, page + ITEMS_PER_PAGE + 20),
-    );
+    // setDataLatestPage(
+    //   data.slice(page + ITEMS_PER_PAGE, page + ITEMS_PER_PAGE + 21),
+    // );
   };
 
   const handleClickPrevPage = () => {
@@ -54,7 +56,7 @@ export const DetailSection = () => {
     }
 
     setFetchState(false);
-    setDataLatestPage(data.slice(page - ITEMS_PER_PAGE, page));
+    // setDataLatestPage(data.slice(page - ITEMS_PER_PAGE, page));
   };
 
   async function fetchUserData(endpoint: string, page: number) {
@@ -157,7 +159,9 @@ export const DetailSection = () => {
       });
 
       dataInput.split("").length === 0 && data.length > 40
-        ? setDataRender(dataLatestPage)
+        ? setDataRender(
+          data.slice(page, page + ITEMS_PER_PAGE),
+        )
         : setDataRender(dataFetched);
     });
   }
