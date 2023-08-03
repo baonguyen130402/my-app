@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/router";
 
 import AuthService from "~/services/AuthService";
@@ -11,55 +11,28 @@ const MAX = 100;
 
 export const DetailSection = () => {
   const firstPage = 0;
-  const limit = ITEMS_PER_PAGE;
 
   const router = useRouter();
+  const dataInput = useRef("");
 
   const [page, setPage] = useState(firstPage);
   const [fetchState, setFetchState] = useState(true);
-  const [dataInput, setDataInput] = useState("");
+
+  interface User {
+    fullName: string;
+    location: string;
+    avatar: string;
+  }
 
   const [dataRender, setDataRender] = useState<
-    { fullName: string; location: string; avatar: string }[]
+    User[]
   >([]);
 
   const [data, setData] = useState<
-    { fullName: string; location: string; avatar: string }[]
+    User[]
   >([]);
 
-  // const [dataLatestPage, setDataLatestPage] = useState(dataRender);
-
-  const handleClickNextPage = () => {
-    page < MAX ? setPage(page + ITEMS_PER_PAGE) : setPage(MAX);
-
-    page < (MAX - 20)
-      ? setDataRender(
-        data.slice(page + ITEMS_PER_PAGE, page + ITEMS_PER_PAGE + 20),
-      )
-      : alert("Oops! This is last page");
-
-    console.log(page);
-
-    setFetchState(true);
-    // setDataLatestPage(
-    //   data.slice(page + ITEMS_PER_PAGE, page + ITEMS_PER_PAGE + 21),
-    // );
-  };
-
-  const handleClickPrevPage = () => {
-    page === firstPage
-      ? alert("Oops! This is first page")
-      : setPage(page - ITEMS_PER_PAGE);
-
-    if (page < MAX && page !== 0) {
-      setDataRender(data.slice(page - ITEMS_PER_PAGE, page));
-    }
-
-    setFetchState(false);
-    // setDataLatestPage(data.slice(page - ITEMS_PER_PAGE, page));
-  };
-
-  async function fetchUserData(endpoint: string, page: number) {
+  const fetchUserData = async (endpoint: string, page: number) => {
     const allRes = await axios.get(endpoint);
 
     const fetchData = [allRes].map((response) => {
@@ -67,11 +40,7 @@ export const DetailSection = () => {
 
       let location, fullName, avatar;
 
-      const dataGetFromEndpoint = userData.filter(
-        (_: any, idx: number) => idx < ITEMS_PER_PAGE,
-      );
-
-      const dataFetched = dataGetFromEndpoint.map((_: any, index: number) => {
+      const dataFetched = userData.map((_: any, index: number) => {
         const userData = response.data.users[index];
         const { address, city } = userData.address;
 
@@ -92,21 +61,17 @@ export const DetailSection = () => {
 
       setDataRender(result);
     });
-  }
+  };
 
-  async function fetchUserDataInNextPage(endpoint: string, page: number) {
-    const allRes = await Promise.all([axios.get(endpoint)]);
+  const fetchUserDataInNextPage = async (endpoint: string, page: number) => {
+    const allRes = await axios.get(endpoint);
 
-    const fetchData = allRes.map((response: any) => {
+    const fetchData = [ allRes ].map((response: any) => {
       const userData = response.data.users;
 
       let location, fullName, avatar;
 
-      const dataGetFromEndpoint = userData.filter(
-        (_: any, idx: number) => idx < ITEMS_PER_PAGE,
-      );
-
-      const dataFetched = dataGetFromEndpoint.map((_: any, index: number) => {
+      const dataFetched = userData.map((_: any, index: number) => {
         const userData = response.data.users[index];
         const { address, city } = userData.address;
 
@@ -129,12 +94,12 @@ export const DetailSection = () => {
         setData(result);
       }
     });
-  }
+  };
 
-  async function userDataSearched(endpoint: string) {
-    const allRes = await Promise.all([axios.get(endpoint)]);
+  const userDataSearched = async (endpoint: string) => {
+    const allRes = await axios.get(endpoint);
 
-    const fetchData = allRes.map((response: any) => {
+    const fetchData = [ allRes ].map((response: any) => {
       const userData = response.data.users;
 
       let location, fullName, avatar;
@@ -158,58 +123,66 @@ export const DetailSection = () => {
         };
       });
 
-      dataInput.split("").length === 0 && data.length > 40
+      dataInput.current.split("").length === 0 && data.length > 40
         ? setDataRender(
           data.slice(page, page + ITEMS_PER_PAGE),
         )
         : setDataRender(dataFetched);
     });
-  }
+  };
+
+  const handleClickNextPage = () => {
+    if (page < MAX - 20) {
+      setPage(page + ITEMS_PER_PAGE);
+      setDataRender(
+        data.slice(page + ITEMS_PER_PAGE, page + ITEMS_PER_PAGE + 20),
+      );
+    } else {
+      setPage(MAX);
+      alert("Oops! This is last page");
+    }
+
+    setFetchState(true);
+  };
+
+  const handleClickPrevPage = () => {
+    if (page <= MAX && page !== 0) {
+      setDataRender(data.slice(page - ITEMS_PER_PAGE, page));
+      setPage(page - ITEMS_PER_PAGE);
+    } else {
+      alert("Oops! This is first page");
+    }
+
+    setFetchState(false);
+  };
 
   useEffect(() => {
     try {
-      if (page === 0 && fetchState) {
-        void fetchUserData(
-          `https://dummyjson.com/users?skip=${page}&limit=${limit}`,
-          page,
-        );
-      }
-    } catch (error) {
-      console.log(error);
-    }
-  }, [page]);
-
-  useEffect(() => {
-    if (dataRender.length !== 0 && fetchState) {
-      try {
-        page < 100 // There are only 100 items.
-          ? void fetchUserDataInNextPage(
-            `https://dummyjson.com/users?skip=${
-              page + ITEMS_PER_PAGE
-            }&limit=${limit}`,
-            page,
-          )
-          : void fetchUserDataInNextPage(
-            `https://dummyjson.com/users?skip=${
-              page - ITEMS_PER_PAGE
-            }&limit=${limit}`,
-            page,
-          );
-      } catch (error) {
-        console.log(error);
-      }
-    }
-  }, [page, dataRender]);
-
-  useEffect(() => {
-    try {
-      void userDataSearched(
-        `https://dummyjson.com/users/search?q=${encodeURIComponent(dataInput)}`,
+      void fetchUserData(
+        `https://dummyjson.com/users?skip=${page}&limit=${ITEMS_PER_PAGE}`,
+        page,
       );
     } catch (error) {
       console.log(error);
     }
-  }, [dataInput]);
+  }, []);
+
+  useEffect(() => {
+    if (dataRender.length !== 0 && fetchState) {
+      try {
+        if (page < MAX && data.length !== 100) { // There are only 100 items.
+          void fetchUserDataInNextPage(
+            `https://dummyjson.com/users?skip=${
+              page + ITEMS_PER_PAGE
+            }&limit=${ITEMS_PER_PAGE}`,
+            page,
+          );
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    }
+  }, [dataRender]);
 
   return (
     <div className="flex h-full w-full flex-col items-center justify-center bg-slate-700">
@@ -218,8 +191,18 @@ export const DetailSection = () => {
           <input
             className="border-blue-gray-200 text-blue-gray-700 placeholder-shown:border-blue-gray-200 placeholder-shown:border-t-blue-gray-200 disabled:bg-blue-gray-50 peer h-full w-full rounded-[7px] border border-t-transparent bg-transparent px-3 py-2.5 font-sans text-sm font-normal outline outline-0 transition-all placeholder-shown:border focus:border-2 focus:border-pink-500 focus:border-t-transparent focus:outline-0 disabled:border-0"
             placeholder=""
-            value={dataInput}
-            onChange={(event) => setDataInput(event.target.value)}
+            onChange={(event) => {
+              dataInput.current = event.target.value;
+              try {
+                void userDataSearched(
+                  `https://dummyjson.com/users/search?q=${
+                    encodeURIComponent(dataInput.current)
+                  }`,
+                );
+              } catch (error) {
+                console.log(error);
+              }
+            }}
           />
           <label className="before:content[' '] after:content[' '] text-blue-gray-400 before:border-blue-gray-200 after:border-blue-gray-200 peer-placeholder-shown:text-blue-gray-500 peer-disabled:peer-placeholder-shown:text-blue-gray-500 pointer-events-none absolute left-0 -top-1.5 flex h-full w-full select-none text-[11px] font-normal leading-tight transition-all before:pointer-events-none before:mt-[6.5px] before:mr-1 before:box-border before:block before:h-1.5 before:w-2.5 before:rounded-tl-md before:border-t before:border-l before:transition-all after:pointer-events-none after:mt-[6.5px] after:ml-1 after:box-border after:block after:h-1.5 after:w-2.5 after:flex-grow after:rounded-tr-md after:border-t after:border-r after:transition-all peer-placeholder-shown:text-sm peer-placeholder-shown:leading-[3.75] peer-placeholder-shown:before:border-transparent peer-placeholder-shown:after:border-transparent peer-focus:text-[11px] peer-focus:leading-tight peer-focus:text-pink-500 peer-focus:before:border-t-2 peer-focus:before:border-l-2 peer-focus:before:border-pink-500 peer-focus:after:border-t-2 peer-focus:after:border-r-2 peer-focus:after:border-pink-500 peer-disabled:text-transparent peer-disabled:before:border-transparent peer-disabled:after:border-transparent">
             Search
