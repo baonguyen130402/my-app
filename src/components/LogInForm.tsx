@@ -5,7 +5,6 @@ import AuthService from "~/services/AuthService";
 const useForm = (initialValue: { [key: string]: any }) => {
   const [formValues, setFormValues] = useState(initialValue);
 
-  console.log(formValues);
   return [
     formValues,
     (event: any) =>

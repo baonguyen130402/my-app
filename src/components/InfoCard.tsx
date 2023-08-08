@@ -1,16 +1,9 @@
-import { use, useEffect, useState } from "react";
-import axios from "axios";
-import AuthService from "~/services/AuthService";
-import { warn } from "console";
-import { useRouter } from "next/router";
+import { useState } from "react";
 
 const promise = new Promise((resolve, reject) => {
   resolve("Done!");
 });
 
-// const someAsyncJob = (data:any) => {
-//   return new Promise((resolve,reject) => reject('Done!'))
-// }
 const someAsyncJob = async (data: any) => {
   return "Done!";
 };
